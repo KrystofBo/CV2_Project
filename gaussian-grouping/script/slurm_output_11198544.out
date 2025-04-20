@@ -1,0 +1,55 @@
+***************************************************************************************************** 
+* WARNING: The 2022 software stack is deprecated. Please consider switching to
+the latest 2024 * 
+* software stack, or the older 2023 software stack. * 
+* * 
+* If you have any question, please contact us via
+http://servicedesk.surfsara.nl. * 
+***************************************************************************************************** 
+Optimizing output/bear
+Output folder: output/bear [15/04 18:26:52]
+Reading camera 1/96Reading camera 2/96Reading camera 3/96Reading camera 4/96Reading camera 5/96Reading camera 6/96Reading camera 7/96Reading camera 8/96Reading camera 9/96Reading camera 10/96Reading camera 11/96Reading camera 12/96Reading camera 13/96Reading camera 14/96Reading camera 15/96Reading camera 16/96Reading camera 17/96Reading camera 18/96Reading camera 19/96Reading camera 20/96Reading camera 21/96Reading camera 22/96Reading camera 23/96Reading camera 24/96Reading camera 25/96Reading camera 26/96Reading camera 27/96Reading camera 28/96Reading camera 29/96Reading camera 30/96Reading camera 31/96Reading camera 32/96Reading camera 33/96Reading camera 34/96Reading camera 35/96Reading camera 36/96Reading camera 37/96Reading camera 38/96Reading camera 39/96Reading camera 40/96Reading camera 41/96Reading camera 42/96Reading camera 43/96Reading camera 44/96Reading camera 45/96Reading camera 46/96Reading camera 47/96Reading camera 48/96Reading camera 49/96Reading camera 50/96Reading camera 51/96Reading camera 52/96Reading camera 53/96Reading camera 54/96Reading camera 55/96Reading camera 56/96Reading camera 57/96Reading camera 58/96Reading camera 59/96Reading camera 60/96Reading camera 61/96Reading camera 62/96Reading camera 63/96Reading camera 64/96Reading camera 65/96Reading camera 66/96Reading camera 67/96Reading camera 68/96Reading camera 69/96Reading camera 70/96Reading camera 71/96Reading camera 72/96Reading camera 73/96Reading camera 74/96Reading camera 75/96Reading camera 76/96Reading camera 77/96Reading camera 78/96Reading camera 79/96Reading camera 80/96Reading camera 81/96Reading camera 82/96Reading camera 83/96Reading camera 84/96Reading camera 85/96Reading camera 86/96Reading camera 87/96Reading camera 88/96Reading camera 89/96Reading camera 90/96Reading camera 91/96Reading camera 92/96Reading camera 93/96Reading camera 94/96Reading camera 95/96Reading camera 96/96 [15/04 18:26:53]
+Loading Training Cameras [15/04 18:26:53]
+Loading Test Cameras [15/04 18:26:59]
+Number of points at initialisation :  63659 [15/04 18:26:59]
+Num classes:  256 [15/04 18:26:59]
+Training progress:   0%|          | 0/30000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "train.py", line 255, in <module>
+    training(lp.extract(args), op.extract(args), pp.extract(args), args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from, args.use_wandb)
+  File "train.py", line 89, in training
+    loss_obj = cls_criterion(logits.unsqueeze(0), gt_obj.unsqueeze(0)).squeeze().mean()
+  File "/home/scur0684/miniconda3/envs/gaussian_grouping/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/scur0684/miniconda3/envs/gaussian_grouping/lib/python3.8/site-packages/torch/nn/modules/loss.py", line 1164, in forward
+    return F.cross_entropy(input, target, weight=self.weight,
+  File "/home/scur0684/miniconda3/envs/gaussian_grouping/lib/python3.8/site-packages/torch/nn/functional.py", line 3014, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(input, target, weight, _Reduction.get_enum(reduction), ignore_index, label_smoothing)
+RuntimeError: input and target batch or spatial sizes don't match: target [1, 729, 985], input [1, 256, 182, 246]
+Training progress:   0%|          | 0/30000 [00:01<?, ?it/s]Looking for config file in output/bear/cfg_args
+Config file found: output/bear/cfg_args
+Rendering output/bear
+Traceback (most recent call last):
+  File "render.py", line 168, in <module>
+    render_sets(model.extract(args), args.iteration, pipeline.extract(args), args.skip_train, args.skip_test)
+  File "render.py", line 135, in render_sets
+    scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
+  File "/gpfs/home3/scur0684/gaussian-grouping/scene/__init__.py", line 35, in __init__
+    self.loaded_iter = searchForMaxIteration(os.path.join(self.model_path, "point_cloud"))
+  File "/gpfs/home3/scur0684/gaussian-grouping/utils/system_utils.py", line 27, in searchForMaxIteration
+    saved_iters = [int(fname.split("_")[-1]) for fname in os.listdir(folder)]
+FileNotFoundError: [Errno 2] No such file or directory: 'output/bear/point_cloud'
+
+JOB STATISTICS
+==============
+Job ID: 11198544
+Cluster: snellius
+User/Group: scur0684/scur0684
+State: RUNNING
+Nodes: 1
+Cores per node: 18
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:09:00 core-walltime
+Job Wall-clock time: 00:00:30
+Memory Utilized: 0.00 MB
+Memory Efficiency: 0.00% of 120.00 GB (120.00 GB/node)
+WARNING: Efficiency statistics can only be obtained after the job has ended as seff tool is based on the accounting database data.

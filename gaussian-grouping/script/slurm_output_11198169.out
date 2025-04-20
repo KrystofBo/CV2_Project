@@ -1,0 +1,36 @@
+***************************************************************************************************** 
+* WARNING: The 2022 software stack is deprecated. Please consider switching to
+the latest 2024 * 
+* software stack, or the older 2023 software stack. * 
+* * 
+* If you have any question, please contact us via
+http://servicedesk.surfsara.nl. * 
+***************************************************************************************************** 
+no change     /home/scur0684/miniconda3/condabin/conda
+no change     /home/scur0684/miniconda3/bin/conda
+no change     /home/scur0684/miniconda3/bin/conda-env
+no change     /home/scur0684/miniconda3/bin/activate
+no change     /home/scur0684/miniconda3/bin/deactivate
+no change     /home/scur0684/miniconda3/etc/profile.d/conda.sh
+no change     /home/scur0684/miniconda3/etc/fish/conf.d/conda.fish
+no change     /home/scur0684/miniconda3/shell/condabin/Conda.psm1
+no change     /home/scur0684/miniconda3/shell/condabin/conda-hook.ps1
+no change     /home/scur0684/miniconda3/lib/python3.12/site-packages/xontrib/conda.xsh
+no change     /home/scur0684/miniconda3/etc/profile.d/conda.csh
+no change     /home/scur0684/.bashrc
+No action taken.
+Error: Folder 'data/bear' does not exist.
+
+JOB STATISTICS
+==============
+Job ID: 11198169
+Cluster: snellius
+User/Group: scur0684/scur0684
+State: FAILED (exit code 2)
+Nodes: 1
+Cores per node: 18
+CPU Utilized: 00:00:02
+CPU Efficiency: 0.93% of 00:03:36 core-walltime
+Job Wall-clock time: 00:00:12
+Memory Utilized: 1.58 MB
+Memory Efficiency: 0.00% of 120.00 GB (120.00 GB/node)

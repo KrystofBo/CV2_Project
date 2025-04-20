@@ -1,0 +1,33 @@
+***************************************************************************************************** 
+* WARNING: The 2022 software stack is deprecated. Please consider switching to
+the latest 2024 * 
+* software stack, or the older 2023 software stack. * 
+* * 
+* If you have any question, please contact us via
+http://servicedesk.surfsara.nl. * 
+***************************************************************************************************** 
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "Anaconda3/2023.07-2"
+   Try: "module spider Anaconda3/2023.07-2" to see how to load the module(s).
+
+
+
+
+CondaError: Run 'conda init' before 'conda activate'
+
+bash: train.sh: No such file or directory
+
+JOB STATISTICS
+==============
+Job ID: 11197990
+Cluster: snellius
+User/Group: scur0684/scur0684
+State: RUNNING
+Nodes: 1
+Cores per node: 18
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:04:30 core-walltime
+Job Wall-clock time: 00:00:15
+Memory Utilized: 0.00 MB
+Memory Efficiency: 0.00% of 120.00 GB (120.00 GB/node)
+WARNING: Efficiency statistics can only be obtained after the job has ended as seff tool is based on the accounting database data.
