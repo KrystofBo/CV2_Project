@@ -53,7 +53,7 @@ class ModelParams(ParamGroup):
         self.eval = False
         self.n_views = 100 
         self.random_init = False
-        self.train_split = False
+        self.train_split = True
         self._object_path = "object_mask"
         self.num_classes = 200
         super().__init__(parser, "Loading Parameters", sentinel)

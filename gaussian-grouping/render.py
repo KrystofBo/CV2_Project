@@ -79,32 +79,34 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     colormask_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_feature16")
     gt_colormask_path = os.path.join(model_path, name, "ours_{}".format(iteration), "gt_objects_color")
     pred_obj_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_pred")
+    pred_id_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_id")
     makedirs(render_path, exist_ok=True)
     makedirs(gts_path, exist_ok=True)
     makedirs(colormask_path, exist_ok=True)
     makedirs(gt_colormask_path, exist_ok=True)
     makedirs(pred_obj_path, exist_ok=True)
+    makedirs(pred_id_path, exist_ok=True)
 
     for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
         results = render(view, gaussians, pipeline, background)
         rendering = results["render"]
         rendering_obj = results["render_object"]
-        
         logits = classifier(rendering_obj)
         pred_obj = torch.argmax(logits,dim=0)
         pred_obj_mask = visualize_obj(pred_obj.cpu().numpy().astype(np.uint8))
-        
+
 
         gt_objects = view.objects
         gt_rgb_mask = visualize_obj(gt_objects.cpu().numpy().astype(np.uint8))
 
         rgb_mask = feature_to_rgb(rendering_obj)
-        Image.fromarray(rgb_mask).save(os.path.join(colormask_path, '{0:05d}'.format(idx) + ".png"))
-        Image.fromarray(gt_rgb_mask).save(os.path.join(gt_colormask_path, '{0:05d}'.format(idx) + ".png"))
-        Image.fromarray(pred_obj_mask).save(os.path.join(pred_obj_path, '{0:05d}'.format(idx) + ".png"))
+        Image.fromarray(rgb_mask).save(os.path.join(colormask_path, view.image_name + ".png"))
+        Image.fromarray(gt_rgb_mask).save(os.path.join(gt_colormask_path, view.image_name + ".png"))
+        Image.fromarray(pred_obj_mask).save(os.path.join(pred_obj_path, view.image_name + ".png"))
+        Image.fromarray(pred_obj.cpu().numpy().astype(np.uint8)).save(os.path.join(pred_id_path, view.image_name + ".png"))
         gt = view.original_image[0:3, :, :]
-        torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
-        torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
+        torchvision.utils.save_image(rendering, os.path.join(render_path, view.image_name + ".png"))
+        torchvision.utils.save_image(gt, os.path.join(gts_path,view.image_name + ".png"))
 
     out_path = os.path.join(render_path[:-8],'concat')
     makedirs(out_path,exist_ok=True)

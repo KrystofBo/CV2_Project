@@ -18,7 +18,10 @@ fi
 
 
 # Gaussian Grouping training
-python train.py    -s $dataset_folder -r ${scale}  -m output/${dataset_name} --config_file config/gaussian_dataset/train.json
+python train.py    -s $dataset_folder -r ${scale}  -m output/${dataset_name} --config_file config/gaussian_dataset/train.json --eval
 
 # Segmentation rendering using trained model
-python render.py -m output/${dataset_name} --num_classes 256
+python render.py -m output/${dataset_name} --num_classes 150 --skip_train --eval #This is to render the novel views (test set)
+
+python render.py -m output/${dataset_name} --num_classes 150 --skip_test --eval #This is to render the training views (test set)
+
