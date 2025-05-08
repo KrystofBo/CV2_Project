@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=TrainOffice
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=18
+#SBATCH --time=05:00:00
+#SBATCH --output=/home/scur0680/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0680/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+module load Anaconda3/2022.05
+
+# Go to the directory that contains the conda env file and install it
+cd $HOME/CV2_Project/gaussian-grouping
+source activate gaussian_grouping
+
+bash script/train.sh office 1
