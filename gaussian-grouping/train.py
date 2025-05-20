@@ -22,18 +22,23 @@ from arguments import ModelParams, PipelineParams, OptimizationParams
 import wandb
 import json
 
+
 def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from, use_wandb):
+
     first_iter = 0
     prepare_output_and_logger(dataset)
+
     gaussians = GaussianModel(dataset.sh_degree)
     scene = Scene(dataset, gaussians)
     gaussians.training_setup(opt)
     num_classes = dataset.num_classes
     print("Num classes: ",num_classes)
+
     classifier = torch.nn.Conv2d(gaussians.num_objects, num_classes, kernel_size=1)
-    cls_criterion = torch.nn.CrossEntropyLoss(reduction='none')
+    cls_criterion = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=255)
     cls_optimizer = torch.optim.Adam(classifier.parameters(), lr=5e-4)
     classifier.cuda()
+
     if checkpoint:
         (model_params, first_iter) = torch.load(checkpoint)
         gaussians.restore(model_params, opt)
@@ -48,9 +53,12 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, opt.iterations), desc="Training progress")
     first_iter += 1
-    for iteration in range(first_iter, opt.iterations + 1):        
+
+    for iteration in range(first_iter, opt.iterations + 1):  
+
         if network_gui.conn == None:
             network_gui.try_connect()
+
         while network_gui.conn != None:
             try:
                 net_image_bytes = None
@@ -146,7 +154,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 print("\n[ITER {}] Saving Checkpoint".format(iteration))
                 torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
 
-def prepare_output_and_logger(args):    
+def prepare_output_and_logger(args): 
+
     if not args.model_path:
         if os.getenv('OAR_JOB_ID'):
             unique_str=os.getenv('OAR_JOB_ID')
@@ -160,7 +169,6 @@ def prepare_output_and_logger(args):
     with open(os.path.join(args.model_path, "cfg_args"), 'w') as cfg_log_f:
         cfg_log_f.write(str(Namespace(**vars(args))))
 
-
 def training_report(iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, scene : Scene, renderFunc, renderArgs, loss_obj_3d, use_wandb):
 
     if use_wandb:
@@ -172,8 +180,16 @@ def training_report(iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, 
     # Report test and samples of training set
     if iteration in testing_iterations:
         torch.cuda.empty_cache()
-        validation_configs = ({'name': 'test', 'cameras' : scene.getTestCameras()}, 
-                              {'name': 'train', 'cameras' : [scene.getTrainCameras()[idx % len(scene.getTrainCameras())] for idx in range(5, 30, 5)]})
+        validation_configs = (
+            {
+                'name': 'test', 
+                'cameras' : scene.getTestCameras()
+            }, 
+            {
+                'name': 'train', 
+                'cameras' : [scene.getTrainCameras()[idx % len(scene.getTrainCameras())] for idx in range(5, 30, 5)]
+            }
+        )
 
         for config in validation_configs:
             if config['cameras'] and len(config['cameras']) > 0:
@@ -191,14 +207,17 @@ def training_report(iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, 
                     psnr_test += psnr(image, gt_image).mean().double()
                 psnr_test /= len(config['cameras'])
                 l1_test /= len(config['cameras'])          
-                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {}".format(iteration, config['name'], l1_test, psnr_test))
+                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {}".format(iteration, config['name'], l1_test, psnr_test), flush=True)
                 if use_wandb:
                     wandb.log({config['name'] + "/loss_viewpoint - l1_loss": l1_test, config['name'] + "/loss_viewpoint - psnr": psnr_test})
+
         if use_wandb:
             wandb.log({"scene/opacity_histogram": scene.gaussians.get_opacity, "total_points": scene.gaussians.get_xyz.shape[0], "iter": iteration})
+        
         torch.cuda.empty_cache()
 
 if __name__ == "__main__":
+
     # Set up command line argument parser
     parser = ArgumentParser(description="Training script parameters")
     lp = ModelParams(parser)
@@ -208,11 +227,12 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=6009)
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
-    parser.add_argument("--test_iterations", nargs="+", type=int, default=[1_000, 7_000, 30_000, 30_000])
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=[1_000, 7_000, 30_000, 60_000])
+    parser.add_argument("--test_iterations", nargs="+", type=int, default=[1_000, 7_000, 10_000, 15_000, 20_000, 25_000, 30_000, 30_000])
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=[1_000, 7_000, 10_000, 15_000, 20_000, 25_000, 30_000, 30_000])
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
+    
     # Add an argument for the configuration file
     parser.add_argument("--config_file", type=str, default="config.json", help="Path to the configuration file")
     parser.add_argument("--use_wandb", action='store_true', default=False, help="Use wandb to record loss value")

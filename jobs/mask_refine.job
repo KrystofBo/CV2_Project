@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=MaskRefineReplica
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=9
+#SBATCH --time=01:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+
+cd gaussian-grouping
+source env/bin/activate
+
+srun python mask_refiner.py office2
+srun python mask_refiner.py room0
+srun python mask_refiner.py room1

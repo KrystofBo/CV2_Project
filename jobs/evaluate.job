@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=evaluateReplicaUncertain
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=1:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+
+cd gaussian-grouping
+source env/bin/activate
+
+# srun python evaluate.py output/scannet1/test/ours_30000/objects_id segment_labels scannet1 dummy.json
+
+#srun python evaluate.py output/office0/test/ours_30000/objects_id data/office0/semantic_class replica results/ours_30000/office0.json
+#srun python evaluate.py output/office1/test/ours_30000/objects_id data/office1/semantic_class replica results/ours_30000/office1.json
+# srun python evaluate.py output/office2_uncertain/test/ours_30000/objects_id data/office2_uncertain/semantic_class replica results/ours_30000/office2_uncertain.json
+# srun python evaluate.py output/room0_uncertain/test/ours_30000/objects_id data/room0_uncertain/semantic_class replica results/ours_30000/room0_uncertain.json
+# srun python evaluate.py output/room1_uncertain/test/ours_30000/objects_id data/room1_uncertain/semantic_class replica results/ours_30000/room1_uncertain.json
+
+srun python evaluate.py output data replica results/replica_baseline.json office0,office1,office2,room0,room1
+srun python evaluate.py output data replica results/replica_refine.json office0_refine,office1_refine,office2_refine,room0_refine,room1_refine
+srun python evaluate.py output data replica results/replica_uncertain.json office0_uncertain,office1_uncertain,office2_uncertain,room0_uncertain,room1_uncertain
+srun python evaluate.py output data replica results/replica_uncertain_refine.json office0_uncertain_refine,office1_uncertain_refine,office2_uncertain_refine,room0_uncertain_refine,room1_uncertain_refine

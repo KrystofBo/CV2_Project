@@ -23,9 +23,9 @@ import colorsys
 import cv2
 from sklearn.decomposition import PCA
 
+
 def feature_to_rgb(features):
     # Input features shape: (16, H, W)
-    
     # Reshape features for PCA
     H, W = features.shape[1], features.shape[2]
     features_reshaped = features.view(features.shape[0], -1).T
@@ -45,6 +45,7 @@ def feature_to_rgb(features):
     return rgb_array
 
 def id2rgb(id, max_num_obj=256):
+
     if not 0 <= id <= max_num_obj:
         raise ValueError("ID should be in range(0, max_num_obj)")
 
@@ -53,10 +54,10 @@ def id2rgb(id, max_num_obj=256):
     h = ((id * golden_ratio) % 1)           # Ensure value is between 0 and 1
     s = 0.5 + (id % 2) * 0.5       # Alternate between 0.5 and 1.0
     l = 0.5
-
     
     # Use colorsys to convert HSL to RGB
     rgb = np.zeros((3, ), dtype=np.uint8)
+
     if id==0:   #invalid region
         return rgb
     r, g, b = colorsys.hls_to_rgb(h, l, s)
@@ -67,44 +68,51 @@ def id2rgb(id, max_num_obj=256):
 def visualize_obj(objects):
     rgb_mask = np.zeros((*objects.shape[-2:], 3), dtype=np.uint8)
     all_obj_ids = np.unique(objects)
+
     for id in all_obj_ids:
         colored_mask = id2rgb(id)
         rgb_mask[objects == id] = colored_mask
+
     return rgb_mask
 
-
 def render_set(model_path, name, iteration, views, gaussians, pipeline, background, classifier):
+
     render_path = os.path.join(model_path, name, "ours_{}".format(iteration), "renders")
     gts_path = os.path.join(model_path, name, "ours_{}".format(iteration), "gt")
     colormask_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_feature16")
     gt_colormask_path = os.path.join(model_path, name, "ours_{}".format(iteration), "gt_objects_color")
     pred_obj_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_pred")
+    pred_id_path = os.path.join(model_path, name, "ours_{}".format(iteration), "objects_id")
+
     makedirs(render_path, exist_ok=True)
     makedirs(gts_path, exist_ok=True)
     makedirs(colormask_path, exist_ok=True)
     makedirs(gt_colormask_path, exist_ok=True)
     makedirs(pred_obj_path, exist_ok=True)
+    makedirs(pred_id_path, exist_ok=True)
 
     for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
+
         results = render(view, gaussians, pipeline, background)
+
         rendering = results["render"]
         rendering_obj = results["render_object"]
-        
+
         logits = classifier(rendering_obj)
         pred_obj = torch.argmax(logits,dim=0)
         pred_obj_mask = visualize_obj(pred_obj.cpu().numpy().astype(np.uint8))
-        
 
+        gt = view.original_image[0:3, :, :]
         gt_objects = view.objects
         gt_rgb_mask = visualize_obj(gt_objects.cpu().numpy().astype(np.uint8))
-
         rgb_mask = feature_to_rgb(rendering_obj)
-        Image.fromarray(rgb_mask).save(os.path.join(colormask_path, '{0:05d}'.format(idx) + ".png"))
-        Image.fromarray(gt_rgb_mask).save(os.path.join(gt_colormask_path, '{0:05d}'.format(idx) + ".png"))
-        Image.fromarray(pred_obj_mask).save(os.path.join(pred_obj_path, '{0:05d}'.format(idx) + ".png"))
-        gt = view.original_image[0:3, :, :]
-        torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
-        torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
+
+        Image.fromarray(rgb_mask).save(os.path.join(colormask_path, view.image_name + ".png"))
+        Image.fromarray(gt_rgb_mask).save(os.path.join(gt_colormask_path, view.image_name + ".png"))
+        Image.fromarray(pred_obj_mask).save(os.path.join(pred_obj_path, view.image_name + ".png"))
+        Image.fromarray(pred_obj.cpu().numpy().astype(np.uint8)).save(os.path.join(pred_id_path, view.image_name + ".png"))
+        torchvision.utils.save_image(rendering, os.path.join(render_path, view.image_name + ".png"))
+        torchvision.utils.save_image(gt, os.path.join(gts_path,view.image_name + ".png"))
 
     out_path = os.path.join(render_path[:-8],'concat')
     makedirs(out_path,exist_ok=True)
@@ -114,6 +122,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     writer = cv2.VideoWriter(os.path.join(out_path,'result.mp4'), fourcc, fps, size)
 
     for file_name in sorted(os.listdir(gts_path)):
+
         gt = np.array(Image.open(os.path.join(gts_path,file_name)))
         rgb = np.array(Image.open(os.path.join(render_path,file_name)))
         gt_obj = np.array(Image.open(os.path.join(gt_colormask_path,file_name)))
@@ -128,9 +137,10 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
     writer.release()
 
-
 def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool):
+
     with torch.no_grad():
+
         gaussians = GaussianModel(dataset.sh_degree)
         scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
         
@@ -151,6 +161,7 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
              render_set(dataset.model_path, "test", scene.loaded_iter, scene.getTestCameras(), gaussians, pipeline, background, classifier)
 
 if __name__ == "__main__":
+
     # Set up command line argument parser
     parser = ArgumentParser(description="Testing script parameters")
     model = ModelParams(parser, sentinel=True)

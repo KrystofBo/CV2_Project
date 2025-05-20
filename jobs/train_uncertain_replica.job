@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=TrainReplicaRefineAll
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=9
+#SBATCH --time=10:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+
+cd gaussian-grouping
+source env/bin/activate
+
+#bash script/train.sh office2_uncertain 1
+#bash script/train.sh room0_uncertain 1
+# bash script/train.sh room1_uncertain 1
+
+bash script/train.sh office2_refine 1
+srun python evaluate.py output/office2_refine/test/ours_30000/objects_id data/office2_refine/semantic_class replica results/ours_30000/office2_refine.json
+
+bash script/train.sh room0_refine 1
+srun python evaluate.py output/room0_refine/test/ours_30000/objects_id data/room0_refine/semantic_class replica results/ours_30000/room0_refine.json
+
+bash script/train.sh room1_refine 1
+srun python evaluate.py output/room1_refine/test/ours_30000/objects_id data/room1_refine/semantic_class replica results/ours_30000/room1_refine.json
+
+
+# bash script/train.sh room0_uncertain_refine 1
+# bash script/train.sh room1_uncertain_refine 1

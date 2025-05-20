@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=ColmapOffice1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=18
+#SBATCH --time=05:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+module load Anaconda3/2022.05
+
+cd $HOME/gaussian-grouping
+source env/bin/activate
+
+srun python convert.py -s data/office1

@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=ReplicaOffice0All
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=9
+#SBATCH --time=10:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+
+cd gaussian-grouping
+source env/bin/activate
+
+# test mmseg -> creates new office1_uncertain folder
+echo "start test_mmseg office0"
+srun python test_mmseg.py office0
+echo "end test_mmseg office0"
+
+# first 30k iterations and eval 
+echo "start train office0"
+bash script/train.sh office0 1
+echo "end train office0"
+
+echo "start evaluate office0"
+srun python evaluate.py output/office0/test/ours_30000/objects_id data/office0/semantic_class replica results/ours_30000/office0.json
+echo "end evaluate office0"
+
+# mask refinement  -> creates new office1_refine folder
+echo "start mask_refiner office0"
+srun python mask_refiner.py office0
+echo "end mask_refiner office0"
+
+# second 30k iterations and eval 
+echo "start train office0_refine"
+bash script/train.sh office0_refine 1
+echo "end train office0_refine"
+
+echo "start evaluate office0_refine"
+srun python evaluate.py output/office0_refine/test/ours_30000/objects_id data/office0_refine/semantic_class replica results/ours_30000/office0_refine.json
+echo "end evaluate office0_refine"
+
+# first 30k iterations and eval for the uncertain folder
+echo "start train office0_uncertain"
+bash script/train.sh office0_uncertain 1
+echo "end train office0_uncertain"
+
+echo "start evaluate office0_uncertain"
+srun python evaluate.py output/office0_uncertain/test/ours_30000/objects_id data/office0_uncertain/semantic_class replica results/ours_30000/office0_uncertain.json
+echo "end evaluate office0_uncertain"
+
+# mask refinement  -> creates new office0_uncertain_refine folder
+echo "start mask_refiner office0_uncertain"
+srun python mask_refiner.py office0_uncertain
+echo "end mask_refiner office0_uncertain"
+
+# second 30k iterations and eval for the uncertain folder
+echo "start train office0_uncertain_refine"
+bash script/train.sh office0_uncertain_refine 1
+echo "end train office0_uncertain_refine"
+
+echo "start evaluate office0_uncertain_refine"
+srun python evaluate.py output/office0_uncertain_refine/test/ours_30000/objects_id data/office0_uncertain_refine/semantic_class replica results/ours_30000/office0_uncertain_refine.json
+echo "end evaluate office0_uncertain_refine"
+
+

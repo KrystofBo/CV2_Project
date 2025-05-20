@@ -1,0 +1,32 @@
+{
+  "metrics": {
+    "wall": 0.7074516415596008,
+    "ceiling": 0.8236322402954102,
+    "blinds": 0.30401280522346497,
+    "sofa": 0.7031687498092651,
+    "rug": 0.08676908165216446,
+    "lamp": 0.10498350858688354,
+    "floor": 0.14856143295764923,
+    "pillow": 0.43043896555900574,
+    "chair": 0.29284265637397766,
+    "door": 0.549025297164917,
+    "pillar": 0.0,
+    "table": 0.3353544771671295,
+    "monitor": 0.0,
+    "blanket": 0.23359493911266327,
+    "tv-screen": 0.0,
+    "picture": 0.7174639105796814,
+    "cushion": 0.4011220335960388,
+    "bed": 0.10972864925861359,
+    "desk": 0.023708820343017578,
+    "mIoU": 0.31430837943365697
+  },
+  "scene_file_counts": {
+    "office0_uncertain_refine": 180,
+    "office1_uncertain_refine": 135,
+    "office2_uncertain_refine": 167,
+    "room0_uncertain_refine": 180,
+    "room1_uncertain_refine": 180
+  },
+  "total_files": 842
+}

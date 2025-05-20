@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=Scannet1_refine
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=9
+#SBATCH --time=10:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2022
+module load Python/3.10.4-GCCcore-11.3.0
+module load CUDA/11.7.0
+
+cd ~/gaussian-grouping
+source env/bin/activate
+
+# test mmseg -> creates new office1_uncertain folder
+# srun python test_mmseg.py scannet4
+
+# first 30k iterations and eval 
+# bash script/train.sh scannet4 1
+
+# first 30k iterations and eval for the uncertain folder
+# bash script/train.sh scannet4_uncertain 1
+
+srun python render.py -m output/scannet1  --num_classes 150 --skip_test
+# mask refinement  -> creates new office1_uncertain_refine folder
+srun python mask_refiner.py scannet1
+
+# second 30k iterations and eval for the uncertain folder
+bash script/train.sh scannet1_refine 1
+
