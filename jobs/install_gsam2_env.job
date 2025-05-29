@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --job-name=Sam2Env
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=9
+#SBATCH --time=1:00:00
+#SBATCH --output=/home/scur0695/logs/out-%x.%A.out
+#SBATCH --error=/home/scur0695/logs/err-%x.%A.err
+
+module load 2023 # required to load cuda12.1
+module load Python/3.11.3-GCCcore-12.3.0
+module load CUDA/12.1.1 # grounded sam2 requirement
+module load Anaconda3/2023.07-2
+
+conda create -n gsam2
+source activate gsam2
+
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
+conda install pip
+cd Grounded-SAM-2
+
+# cd checkpoints
+# bash download_ckpts.sh
+# cd ..
+
+# cd gdino_checkpoints
+# bash download_ckpts.sh
+# cd ..
+
+pip install -e .
+
+pip install --no-build-isolation -e grounding_dino
+
+pip install supervision
+pip install hydra-core --upgrade
+pip install "transformers[torch]"
+
+
+
+
